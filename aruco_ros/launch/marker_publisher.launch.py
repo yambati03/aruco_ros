@@ -1,27 +1,24 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
-from launch.utilities import perform_substitutions
 from launch_ros.actions import Node
 
 
 def launch_setup(context, *args, **kwargs):
 
-    side = perform_substitutions(context, [LaunchConfiguration('side')])
-
     aruco_marker_publisher_params = {
         'image_is_rectified': True,
         'marker_size': LaunchConfiguration('marker_size'),
         'reference_frame': LaunchConfiguration('reference_frame'),
-        'camera_frame': side + '_hand_camera',
+        'camera_frame': 'camera_link',
     }
 
     aruco_marker_publisher = Node(
         package='aruco_ros',
         executable='marker_publisher',
         parameters=[aruco_marker_publisher_params],
-        remappings=[('/camera_info', '/cameras/' + side + '_hand_camera/camera_info'),
-                    ('/image', '/cameras/' + side + '_hand_camera/image')],
+        remappings=[('/camera_info', '/camera/color/camera_info'),
+                    ('/image', '/camera/color/image_raw')],
     )
 
     return [aruco_marker_publisher]
@@ -41,7 +38,7 @@ def generate_launch_description():
     )
 
     reference_frame = DeclareLaunchArgument(
-        'reference_frame', default_value='base',
+        'reference_frame', default_value='camera_link',
         description='Reference frame. '
         'Leave it empty and the pose will be published wrt param parent_name. '
     )
