@@ -20,18 +20,19 @@ namespace aruco
 {
 int Debug::level = 2;
 std::map<std::string, std::string> Debug::strings;
-void Debug::addString(std::string &label, std::string &data)
+void Debug::addString(std::string & label, std::string & data)
 {
   strings.insert(make_pair(label, data));
 }
 
-std::string Debug::getString(std::string &str)
+std::string Debug::getString(std::string & str)
 {
   auto it = strings.find(str);
-  if (it == strings.end())
+  if (it == strings.end()) {
     return "";
-  else
+  } else {
     return it->second;
+  }
 }
 
 
@@ -50,11 +51,9 @@ int Debug::getLevel()
 }
 void Debug::init()
 {
-  if (!isInited)
-  {
+  if (!isInited) {
     isInited = true;
-    if (level >= 1)
-    {
+    if (level >= 1) {
     }
   }
 }

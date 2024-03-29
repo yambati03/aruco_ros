@@ -15,7 +15,6 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 */
 
 
-
 #ifndef __OPENARUCO_CORE_TYPES_H__
 #define __OPENARUCO_CORE_TYPES_H__
 

@@ -22,112 +22,112 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 #include "aruco_export.h"
 namespace aruco
 {
-class ARUCO_EXPORT FractalDetector
-{
-  struct ARUCO_EXPORT Params
+  class ARUCO_EXPORT FractalDetector
   {
-    std::string configuration_type;
-  };
+    struct ARUCO_EXPORT Params
+    {
+      std::string configuration_type;
+    };
 
 public:
-  FractalDetector();
+    FractalDetector();
 
-  /**
-   * @brief setConfiguration
-   * @param configuration fractal id
-   */
-  void setConfiguration(int configuration);
+    /**
+     * @brief setConfiguration
+     * @param configuration fractal id
+     */
+    void setConfiguration(int configuration);
 
-  /**
-   * @brief setConfiguration
-   * @param configuration fractal file
-   */
-  void setConfiguration(std::string configuration);
+    /**
+     * @brief setConfiguration
+     * @param configuration fractal file
+     */
+    void setConfiguration(std::string configuration);
 
-  /**
-   * @brief setParams
-   * @param cam_params camera parameters
-   * @param markerSize in meters
-   */
-  void setParams(const CameraParameters &cam_params, float markerSize)
-  {
-    _cam_params = cam_params;
-
-    Tracker.setParams(cam_params, _fractalLabeler->_fractalMarkerSet, markerSize);
-  }
-
-  // return fractalmarkerset
-  FractalMarkerSet getConfiguration()
-  {
-    return Tracker.getFractal();
-  }
-
-  // return true if any marker is detected, false otherwise
-  bool detect(const cv::Mat &input)
-  {
-    Markers = _markerDetector->detect(input);
-
-    if (Markers.size() > 0)
-      return true;
-    else
-      return false;
-  }
-
-  // return true if the pose is estimated, false otherwise
-  bool poseEstimation()
-  {
-    if (_cam_params.isValid())
+    /**
+     * @brief setParams
+     * @param cam_params camera parameters
+     * @param markerSize in meters
+     */
+    void setParams(const CameraParameters & cam_params, float markerSize)
     {
-      return Tracker.fractalInnerPose(_markerDetector, Markers);
+      _cam_params = cam_params;
+
+      Tracker.setParams(cam_params, _fractalLabeler->_fractalMarkerSet, markerSize);
     }
-    else
-      return false;
-  }
 
-  // return the rotation vector. Returns an empty matrix if last call to estimatePose returned false
-  cv::Mat getRvec()
-  {
-    return Tracker.getRvec();
-  }
-  // return the translation vector. Returns an empty matrix if last call to estimatePose returned false
-  cv::Mat getTvec()
-  {
-    return Tracker.getTvec();
-  }
+    // return fractalmarkerset
+    FractalMarkerSet getConfiguration()
+    {
+      return Tracker.getFractal();
+    }
 
-  void drawImage(cv::Mat &img, cv::Mat &img2);
+    // return true if any marker is detected, false otherwise
+    bool detect(const cv::Mat & input)
+    {
+      Markers = _markerDetector->detect(input);
 
-  // draw borders of markers
-  void drawMarkers(cv::Mat &img);
+      if (Markers.size() > 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
 
-  // draw inner corners of markers
-  void draw2d(cv::Mat &img);
+    // return true if the pose is estimated, false otherwise
+    bool poseEstimation()
+    {
+      if (_cam_params.isValid()) {
+        return Tracker.fractalInnerPose(_markerDetector, Markers);
+      } else {
+        return false;
+      }
+    }
 
-  // draw pose estimation axes
-  void draw3d(cv::Mat &img, bool cube = true, bool axis = true);
+    // return the rotation vector. Returns an empty matrix if last call to estimatePose returned false
+    cv::Mat getRvec()
+    {
+      return Tracker.getRvec();
+    }
+    // return the translation vector. Returns an empty matrix if last call to estimatePose returned false
+    cv::Mat getTvec()
+    {
+      return Tracker.getTvec();
+    }
 
-  // draw marker as cube
-  void draw3dCube(cv::Mat &Image, FractalMarker m, const CameraParameters &CP, int lineSize);
+    void drawImage(cv::Mat & img, cv::Mat & img2);
 
-  // return detected markers
-  std::vector<Marker> getMarkers()
-  {
-    return Markers;
-  }
+    // draw borders of markers
+    void drawMarkers(cv::Mat & img);
 
-  // return image pyramid
-  std::vector<cv::Mat> getImagePyramid()
-  {
-    return _markerDetector->getImagePyramid();
-  }
+    // draw inner corners of markers
+    void draw2d(cv::Mat & img);
+
+    // draw pose estimation axes
+    void draw3d(cv::Mat & img, bool cube = true, bool axis = true);
+
+    // draw marker as cube
+    void draw3dCube(cv::Mat & Image, FractalMarker m, const CameraParameters & CP, int lineSize);
+
+    // return detected markers
+    std::vector < Marker > getMarkers()
+    {
+      return Markers;
+    }
+
+    // return image pyramid
+    std::vector < cv::Mat > getImagePyramid()
+    {
+      return _markerDetector->getImagePyramid();
+    }
 
 private:
-  std::vector<aruco::Marker> Markers;  // detected markers
-  FractalPoseTracker Tracker;
-  Params _params;
-  CameraParameters _cam_params;  // Camera parameters
-  cv::Ptr<FractalMarkerLabeler> _fractalLabeler;
-  cv::Ptr<MarkerDetector> _markerDetector;
-};
+    std::vector < aruco::Marker > Markers; // detected markers
+    FractalPoseTracker Tracker;
+    Params _params;
+    CameraParameters _cam_params; // Camera parameters
+    cv::Ptr < FractalMarkerLabeler > _fractalLabeler;
+    cv::Ptr < MarkerDetector > _markerDetector;
+  };
 }  // namespace aruco
 #endif

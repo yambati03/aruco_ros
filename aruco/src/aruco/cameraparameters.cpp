@@ -42,7 +42,7 @@ CameraParameters::CameraParameters(cv::Mat cameraMatrix, cv::Mat distorsionCoeff
 }
 /**
  */
-CameraParameters::CameraParameters(const CameraParameters &CI)
+CameraParameters::CameraParameters(const CameraParameters & CI)
 {
   CI.CameraMatrix.copyTo(CameraMatrix);
   CI.Distorsion.copyTo(Distorsion);
@@ -52,7 +52,7 @@ CameraParameters::CameraParameters(const CameraParameters &CI)
 
 /**
  */
-CameraParameters &CameraParameters::operator=(const CameraParameters &CI)
+CameraParameters & CameraParameters::operator=(const CameraParameters & CI)
 {
   CI.CameraMatrix.copyTo(CameraMatrix);
   CI.Distorsion.copyTo(Distorsion);
@@ -72,8 +72,7 @@ void CameraParameters::setParams(cv::Mat cameraMatrix, cv::Mat distorsionCoeff, 
 {
   cv::Mat auxCamMatrix;
   ExtrinsicMatrix = cv::Mat::zeros(1, 3, CV_64FC1);
-  if (cameraMatrix.rows == 3 && cameraMatrix.cols == 4)
-  {
+  if (cameraMatrix.rows == 3 && cameraMatrix.cols == 4) {
     ExtrinsicMatrix.at<double>(0, 0) = cameraMatrix.at<double>(0, 3);
     ExtrinsicMatrix.at<double>(0, 1) = cameraMatrix.at<double>(1, 3);
     ExtrinsicMatrix.at<double>(0, 2) = cameraMatrix.at<double>(2, 3);
@@ -83,13 +82,17 @@ void CameraParameters::setParams(cv::Mat cameraMatrix, cv::Mat distorsionCoeff, 
     cameraMatrix = auxCamMatrix;
   }
 
-  if (cameraMatrix.rows != 3 || cameraMatrix.cols != 3)
-    throw cv::Exception(9000, "invalid input cameraMatrix", "CameraParameters::setParams",
-                        __FILE__, __LINE__);
+  if (cameraMatrix.rows != 3 || cameraMatrix.cols != 3) {
+    throw cv::Exception(
+            9000, "invalid input cameraMatrix", "CameraParameters::setParams",
+            __FILE__, __LINE__);
+  }
   cameraMatrix.convertTo(CameraMatrix, CV_32FC1);
-  if (distorsionCoeff.total() < 4 || distorsionCoeff.total() >= 7)
-    throw cv::Exception(9000, "invalid input distorsionCoeff",
-                        "CameraParameters::setParams", __FILE__, __LINE__);
+  if (distorsionCoeff.total() < 4 || distorsionCoeff.total() >= 7) {
+    throw cv::Exception(
+            9000, "invalid input distorsionCoeff",
+            "CameraParameters::setParams", __FILE__, __LINE__);
+  }
   cv::Mat auxD;
 
   distorsionCoeff.convertTo(Distorsion, CV_32FC1);
@@ -103,19 +106,22 @@ void CameraParameters::setParams(cv::Mat cameraMatrix, cv::Mat distorsionCoeff, 
 
 /**
  */
-cv::Point3f CameraParameters::getCameraLocation(const cv::Mat &Rvec, const cv::Mat &Tvec)
+cv::Point3f CameraParameters::getCameraLocation(const cv::Mat & Rvec, const cv::Mat & Tvec)
 {
   cv::Mat m33(3, 3, CV_32FC1);
   cv::Rodrigues(Rvec, m33);
 
   cv::Mat m44 = cv::Mat::eye(4, 4, CV_32FC1);
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
       m44.at<float>(i, j) = m33.at<float>(i, j);
+    }
+  }
 
   // now, add translation information
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     m44.at<float>(i, 3) = Tvec.ptr<float>(0)[i];
+  }
 
 
   // invert the matrix
@@ -127,14 +133,16 @@ cv::Point3f CameraParameters::getCameraLocation(const cv::Mat &Rvec, const cv::M
  */
 void CameraParameters::saveToFile(string path, bool inXML)
 {
-  if (!isValid())
+  if (!isValid()) {
     throw cv::Exception(9006, "invalid object", "CameraParameters::saveToFile", __FILE__, __LINE__);
-  if (!inXML)
-  {
+  }
+  if (!inXML) {
     ofstream file(path.c_str());
-    if (!file)
-      throw cv::Exception(9006, "could not open file:" + path,
-                          "CameraParameters::saveToFile", __FILE__, __LINE__);
+    if (!file) {
+      throw cv::Exception(
+              9006, "could not open file:" + path,
+              "CameraParameters::saveToFile", __FILE__, __LINE__);
+    }
     file << "# Aruco 1.0 CameraParameters" << endl;
     file << "fx = " << CameraMatrix.at<float>(0, 0) << endl;
     file << "cx = " << CameraMatrix.at<float>(0, 2) << endl;
@@ -149,9 +157,7 @@ void CameraParameters::saveToFile(string path, bool inXML)
     file << "tz = " << ExtrinsicMatrix.at<float>(2, 0) << std::endl;
     file << "width = " << CamSize.width << endl;
     file << "height = " << CamSize.height << endl;
-  }
-  else
-  {
+  } else {
     cv::FileStorage fs(path, cv::FileStorage::WRITE);
     fs << "image_width" << CamSize.width;
     fs << "image_height" << CamSize.height;
@@ -165,10 +171,12 @@ void CameraParameters::saveToFile(string path, bool inXML)
  */
 void CameraParameters::resize(cv::Size size)
 {
-  if (!isValid())
+  if (!isValid()) {
     throw cv::Exception(9007, "invalid object", "CameraParameters::resize", __FILE__, __LINE__);
-  if (size == CamSize)
+  }
+  if (size == CamSize) {
     return;
+  }
   // now, read the camera size
   // resize the camera parameters to fit this image size
   float AxFactor = float(size.width) / float(CamSize.width);
@@ -189,8 +197,9 @@ void CameraParameters::resize(cv::Size size)
 void CameraParameters::readFromXMLFile(string filePath)
 {
   cv::FileStorage fs(filePath, cv::FileStorage::READ);
-  if (!fs.isOpened())
+  if (!fs.isOpened()) {
     throw std::runtime_error("CameraParameters::readFromXMLFile could not open file:" + filePath);
+  }
   int w = -1, h = -1;
   cv::Mat MCamera, MDist, MExtrinsics;
 
@@ -201,33 +210,37 @@ void CameraParameters::readFromXMLFile(string filePath)
   fs["camera_matrix"] >> MCamera;
   fs["extrinsics"] >> MExtrinsics;
 
-  if (MCamera.cols == 0 || MCamera.rows == 0)
-  {
+  if (MCamera.cols == 0 || MCamera.rows == 0) {
     fs["Camera_Matrix"] >> MCamera;
-    if (MCamera.cols == 0 || MCamera.rows == 0)
-      throw cv::Exception(9007, "File :" + filePath + " does not contains valid camera matrix",
-                          "CameraParameters::readFromXML", __FILE__, __LINE__);
+    if (MCamera.cols == 0 || MCamera.rows == 0) {
+      throw cv::Exception(
+              9007, "File :" + filePath + " does not contains valid camera matrix",
+              "CameraParameters::readFromXML", __FILE__, __LINE__);
+    }
   }
 
-  if (w == -1 || h == 0)
-  {
+  if (w == -1 || h == 0) {
     fs["image_Width"] >> w;
     fs["image_Height"] >> h;
-    if (w == -1 || h == 0)
-      throw cv::Exception(9007, "File :" + filePath + " does not contains valid camera dimensions",
-                          "CameraParameters::readFromXML", __FILE__, __LINE__);
+    if (w == -1 || h == 0) {
+      throw cv::Exception(
+              9007, "File :" + filePath + " does not contains valid camera dimensions",
+              "CameraParameters::readFromXML", __FILE__, __LINE__);
+    }
   }
-  if (MCamera.type() != CV_32FC1)
+  if (MCamera.type() != CV_32FC1) {
     MCamera.convertTo(CameraMatrix, CV_32FC1);
-  else
+  } else {
     CameraMatrix = MCamera;
+  }
 
-  if (MDist.total() < 4)
-  {
+  if (MDist.total() < 4) {
     fs["Distortion_Coefficients"] >> MDist;
-    if (MDist.total() < 4)
-      throw cv::Exception(9007, "File :" + filePath + " does not contains valid distortion_coefficients",
-                          "CameraParameters::readFromXML", __FILE__, __LINE__);
+    if (MDist.total() < 4) {
+      throw cv::Exception(
+              9007, "File :" + filePath + " does not contains valid distortion_coefficients",
+              "CameraParameters::readFromXML", __FILE__, __LINE__);
+    }
   }
   // convert to 32 and get the 4 first elements only
   cv::Mat mdist32;
@@ -237,24 +250,30 @@ void CameraParameters::readFromXMLFile(string filePath)
   //         Distorsion.ptr<float>(0)[i]=mdist32.ptr<float>(0)[i];
 
   Distorsion.create(1, 5, CV_32FC1);
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 5; i++) {
     Distorsion.ptr<float>(0)[i] = mdist32.ptr<float>(0)[i];
+  }
   CamSize.width = w;
   CamSize.height = h;
 }
 /****
  *
  */
-void CameraParameters::glGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
-                                             double proj_matrix[16], double gnear,
-                                             double gfar, bool invert)
+void CameraParameters::glGetProjectionMatrix(
+  cv::Size orgImgSize, cv::Size size,
+  double proj_matrix[16], double gnear,
+  double gfar, bool invert)
 {
-  if (cv::countNonZero(Distorsion) != 0)
-    std::cerr << "CameraParameters::glGetProjectionMatrix :: The camera has distortion coefficients "
+  if (cv::countNonZero(Distorsion) != 0) {
+    std::cerr <<
+      "CameraParameters::glGetProjectionMatrix :: The camera has distortion coefficients "
               << __FILE__ << " " << __LINE__ << endl;
-  if (isValid() == false)
-    throw cv::Exception(9100, "invalid camera parameters",
-                        "CameraParameters::glGetProjectionMatrix", __FILE__, __LINE__);
+  }
+  if (isValid() == false) {
+    throw cv::Exception(
+            9100, "invalid camera parameters",
+            "CameraParameters::glGetProjectionMatrix", __FILE__, __LINE__);
+  }
 
   // Deterime the rsized info
   double Ax = double(size.width) / double(orgImgSize.width);
@@ -263,7 +282,7 @@ void CameraParameters::glGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
   double _cx = CameraMatrix.at<float>(0, 2) * Ax;
   double _fy = CameraMatrix.at<float>(1, 1) * Ay;
   double _cy = CameraMatrix.at<float>(1, 2) * Ay;
-  double cparam[3][4] = { { _fx, 0, _cx, 0 }, { 0, _fy, _cy, 0 }, { 0, 0, 1, 0 } };
+  double cparam[3][4] = {{_fx, 0, _cx, 0}, {0, _fy, _cy, 0}, {0, 0, 1, 0}};
 
   argConvGLcpara2(cparam, size.width, size.height, gnear, gfar, proj_matrix, invert);
 }
@@ -274,7 +293,7 @@ void CameraParameters::glGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
  *******************/
 double CameraParameters::norm(double a, double b, double c)
 {
-  return (sqrt(a * a + b * b + c * c));
+  return sqrt(a * a + b * b + c * c);
 }
 
 /*******************
@@ -284,7 +303,7 @@ double CameraParameters::norm(double a, double b, double c)
 
 double CameraParameters::dot(double a1, double a2, double a3, double b1, double b2, double b3)
 {
-  return (a1 * b1 + a2 * b2 + a3 * b3);
+  return a1 * b1 + a2 * b2 + a3 * b3;
 }
 
 /*******************
@@ -292,8 +311,9 @@ double CameraParameters::dot(double a1, double a2, double a3, double b1, double 
  *
  *******************/
 
-void CameraParameters::argConvGLcpara2(double cparam[3][4], int width, int height,
-                                       double gnear, double gfar, double m[16], bool invert)
+void CameraParameters::argConvGLcpara2(
+  double cparam[3][4], int width, int height,
+  double gnear, double gfar, double m[16], bool invert)
 {
   double icpara[3][4];
   double trans[3][4];
@@ -304,14 +324,14 @@ void CameraParameters::argConvGLcpara2(double cparam[3][4], int width, int heigh
   cparam[1][2] *= -1.0;
   cparam[2][2] *= -1.0;
 
-  if (arParamDecompMat(cparam, icpara, trans) < 0)
-    throw cv::Exception(9002, "parameter error", "MarkerDetector::argConvGLcpara2",
-                        __FILE__, __LINE__);
+  if (arParamDecompMat(cparam, icpara, trans) < 0) {
+    throw cv::Exception(
+            9002, "parameter error", "MarkerDetector::argConvGLcpara2",
+            __FILE__, __LINE__);
+  }
 
-  for (i = 0; i < 3; i++)
-  {
-    for (j = 0; j < 3; j++)
-    {
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
       p[i][j] = icpara[i][j] / icpara[2][2];
     }
   }
@@ -335,18 +355,15 @@ void CameraParameters::argConvGLcpara2(double cparam[3][4], int width, int heigh
   q[3][2] = 1.0;
   q[3][3] = 0.0;
 
-  for (i = 0; i < 4; i++)
-  {
-    for (j = 0; j < 3; j++)
-    {
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 3; j++) {
       m[i + j * 4] = q[i][0] * trans[0][j] + q[i][1] * trans[1][j] + q[i][2] * trans[2][j];
     }
     m[i + 3 * 4] =
-        q[i][0] * trans[0][3] + q[i][1] * trans[1][3] + q[i][2] * trans[2][3] + q[i][3];
+      q[i][0] * trans[0][3] + q[i][1] * trans[1][3] + q[i][2] * trans[2][3] + q[i][3];
   }
 
-  if (!invert)
-  {
+  if (!invert) {
     m[13] = -m[13];
     m[1] = -m[1];
     m[5] = -m[5];
@@ -358,38 +375,30 @@ void CameraParameters::argConvGLcpara2(double cparam[3][4], int width, int heigh
  *
  *******************/
 
-int CameraParameters::arParamDecompMat(double source[3][4], double cpara[3][4],
-                                       double trans[3][4])
+int CameraParameters::arParamDecompMat(
+  double source[3][4], double cpara[3][4],
+  double trans[3][4])
 {
   int r, c;
   double Cpara[3][4];
   double rem1, rem2, rem3;
 
-  if (source[2][3] >= 0)
-  {
-    for (r = 0; r < 3; r++)
-    {
-      for (c = 0; c < 4; c++)
-      {
+  if (source[2][3] >= 0) {
+    for (r = 0; r < 3; r++) {
+      for (c = 0; c < 4; c++) {
         Cpara[r][c] = source[r][c];
       }
     }
-  }
-  else
-  {
-    for (r = 0; r < 3; r++)
-    {
-      for (c = 0; c < 4; c++)
-      {
+  } else {
+    for (r = 0; r < 3; r++) {
+      for (c = 0; c < 4; c++) {
         Cpara[r][c] = -(source[r][c]);
       }
     }
   }
 
-  for (r = 0; r < 3; r++)
-  {
-    for (c = 0; c < 4; c++)
-    {
+  for (r = 0; r < 3; r++) {
+    for (c = 0; c < 4; c++) {
       cpara[r][c] = 0.0;
     }
   }
@@ -400,7 +409,7 @@ int CameraParameters::arParamDecompMat(double source[3][4], double cpara[3][4],
   trans[2][3] = Cpara[2][3] / cpara[2][2];
 
   cpara[1][2] =
-      dot(trans[2][0], trans[2][1], trans[2][2], Cpara[1][0], Cpara[1][1], Cpara[1][2]);
+    dot(trans[2][0], trans[2][1], trans[2][2], Cpara[1][0], Cpara[1][1], Cpara[1][2]);
   rem1 = Cpara[1][0] - cpara[1][2] * trans[2][0];
   rem2 = Cpara[1][1] - cpara[1][2] * trans[2][1];
   rem3 = Cpara[1][2] - cpara[1][2] * trans[2][2];
@@ -410,9 +419,9 @@ int CameraParameters::arParamDecompMat(double source[3][4], double cpara[3][4],
   trans[1][2] = rem3 / cpara[1][1];
 
   cpara[0][2] =
-      dot(trans[2][0], trans[2][1], trans[2][2], Cpara[0][0], Cpara[0][1], Cpara[0][2]);
+    dot(trans[2][0], trans[2][1], trans[2][2], Cpara[0][0], Cpara[0][1], Cpara[0][2]);
   cpara[0][1] =
-      dot(trans[1][0], trans[1][1], trans[1][2], Cpara[0][0], Cpara[0][1], Cpara[0][2]);
+    dot(trans[1][0], trans[1][1], trans[1][2], Cpara[0][0], Cpara[0][1], Cpara[0][2]);
   rem1 = Cpara[0][0] - cpara[0][1] * trans[1][0] - cpara[0][2] * trans[2][0];
   rem2 = Cpara[0][1] - cpara[0][1] * trans[1][1] - cpara[0][2] * trans[2][1];
   rem3 = Cpara[0][2] - cpara[0][1] * trans[1][2] - cpara[0][2] * trans[2][2];
@@ -423,12 +432,10 @@ int CameraParameters::arParamDecompMat(double source[3][4], double cpara[3][4],
 
   trans[1][3] = (Cpara[1][3] - cpara[1][2] * trans[2][3]) / cpara[1][1];
   trans[0][3] =
-      (Cpara[0][3] - cpara[0][1] * trans[1][3] - cpara[0][2] * trans[2][3]) / cpara[0][0];
+    (Cpara[0][3] - cpara[0][1] * trans[1][3] - cpara[0][2] * trans[2][3]) / cpara[0][0];
 
-  for (r = 0; r < 3; r++)
-  {
-    for (c = 0; c < 3; c++)
-    {
+  for (r = 0; r < 3; r++) {
+    for (c = 0; c < 3; c++) {
       cpara[r][c] /= cpara[2][2];
     }
   }
@@ -439,9 +446,10 @@ int CameraParameters::arParamDecompMat(double source[3][4], double cpara[3][4],
 /******
  *
  */
-void CameraParameters::OgreGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
-                                               double proj_matrix[16], double gnear,
-                                               double gfar, bool invert)
+void CameraParameters::OgreGetProjectionMatrix(
+  cv::Size orgImgSize, cv::Size size,
+  double proj_matrix[16], double gnear,
+  double gfar, bool invert)
 {
   double temp_matrix[16];
   (*this).glGetProjectionMatrix(orgImgSize, size, temp_matrix, gnear, gfar, invert);
@@ -469,90 +477,88 @@ void CameraParameters::OgreGetProjectionMatrix(cv::Size orgImgSize, cv::Size siz
  *
  */
 
-cv::Mat CameraParameters::getRTMatrix(const cv::Mat &R_, const cv::Mat &T_, int forceType)
+cv::Mat CameraParameters::getRTMatrix(const cv::Mat & R_, const cv::Mat & T_, int forceType)
 {
   cv::Mat M;
   cv::Mat R, T;
   R_.copyTo(R);
   T_.copyTo(T);
-  if (R.type() == CV_64F)
-  {
+  if (R.type() == CV_64F) {
     assert(T.type() == CV_64F);
     cv::Mat Matrix = cv::Mat::eye(4, 4, CV_64FC1);
 
     cv::Mat R33 = cv::Mat(Matrix, cv::Rect(0, 0, 3, 3));
-    if (R.total() == 3)
-    {
+    if (R.total() == 3) {
       cv::Rodrigues(R, R33);
-    }
-    else if (R.total() == 9)
-    {
+    } else if (R.total() == 9) {
       cv::Mat R64;
       R.convertTo(R64, CV_64F);
       R.copyTo(R33);
     }
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       Matrix.at<double>(i, 3) = T.ptr<double>(0)[i];
+    }
     M = Matrix;
-  }
-  else if (R.depth() == CV_32F)
-  {
+  } else if (R.depth() == CV_32F) {
     cv::Mat Matrix = cv::Mat::eye(4, 4, CV_32FC1);
     cv::Mat R33 = cv::Mat(Matrix, cv::Rect(0, 0, 3, 3));
-    if (R.total() == 3)
-    {
+    if (R.total() == 3) {
       cv::Rodrigues(R, R33);
-    }
-    else if (R.total() == 9)
-    {
+    } else if (R.total() == 9) {
       cv::Mat R32;
       R.convertTo(R32, CV_32F);
       R.copyTo(R33);
     }
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       Matrix.at<float>(i, 3) = T.ptr<float>(0)[i];
+    }
     M = Matrix;
   }
 
-  if (forceType == -1)
+  if (forceType == -1) {
     return M;
-  else
-  {
+  } else {
     cv::Mat MTyped;
     M.convertTo(MTyped, forceType);
     return MTyped;
   }
 }
 
-std::ostream &operator<<(std::ostream &str, const CameraParameters &cp)
+std::ostream & operator<<(std::ostream & str, const CameraParameters & cp)
 {
   str << cp.CamSize.width << " " << cp.CamSize.height << " ";
-  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
+  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++) {
     str << cp.CameraMatrix.ptr<float>(0)[i] << " ";
+  }
   str << cp.Distorsion.total() << " ";
-  for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
+  for (std::size_t i = 0; i < cp.Distorsion.total(); i++) {
     str << cp.Distorsion.ptr<float>(0)[i] << " ";
-  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+  }
+  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++) {
     str << cp.ExtrinsicMatrix.ptr<float>(0)[i] << " ";
+  }
   return str;
 }
 
-std::istream &operator>>(std::istream &str, CameraParameters &cp)
+std::istream & operator>>(std::istream & str, CameraParameters & cp)
 {
   str >> cp.CamSize.width >> cp.CamSize.height;
   cp.CameraMatrix.create(3, 3, CV_32F);
-  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
+  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++) {
     str >> cp.CameraMatrix.ptr<float>(0)[i];
+  }
   int t;
   str >> t;
   cp.Distorsion.create(1, t, CV_32F);
-  for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
+  for (std::size_t i = 0; i < cp.Distorsion.total(); i++) {
     str >> cp.Distorsion.ptr<float>(0)[i];
+  }
   cp.Distorsion.create(1, 3, CV_32F);
-  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++) {
     str >> cp.ExtrinsicMatrix.ptr<float>(0)[i];
+  }
   return str;
 }
 
-};  // namespace aruco
+}   // namespace aruco

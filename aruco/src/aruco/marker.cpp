@@ -38,8 +38,9 @@ Marker::Marker()
   ssize = -1;
   Rvec.create(3, 1, CV_32FC1);
   Tvec.create(3, 1, CV_32FC1);
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     Tvec.at<float>(i, 0) = Rvec.at<float>(i, 0) = -999999;
+  }
 }
 /**
  *
@@ -50,13 +51,15 @@ Marker::Marker(int _id)
   ssize = -1;
   Rvec.create(3, 1, CV_32FC1);
   Tvec.create(3, 1, CV_32FC1);
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     Tvec.at<float>(i, 0) = Rvec.at<float>(i, 0) = -999999;
+  }
 }
 /**
  *
  */
-Marker::Marker(const Marker& M) : std::vector<cv::Point2f>(M)
+Marker::Marker(const Marker & M)
+: std::vector<cv::Point2f>(M)
 {
   M.copyTo(*this);
 }
@@ -64,18 +67,19 @@ Marker::Marker(const Marker& M) : std::vector<cv::Point2f>(M)
 /**
  *
  */
-Marker::Marker(const std::vector<cv::Point2f>& corners, int _id)
-  : std::vector<cv::Point2f>(corners)
+Marker::Marker(const std::vector<cv::Point2f> & corners, int _id)
+: std::vector<cv::Point2f>(corners)
 {
   id = _id;
   ssize = -1;
   Rvec.create(3, 1, CV_32FC1);
   Tvec.create(3, 1, CV_32FC1);
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     Tvec.at<float>(i, 0) = Rvec.at<float>(i, 0) = -999999;
+  }
 }
 
-void Marker::copyTo(Marker& m) const
+void Marker::copyTo(Marker & m) const
 {
   m.id = id;
   // size of the markers sides in meters
@@ -84,14 +88,15 @@ void Marker::copyTo(Marker& m) const
   Rvec.copyTo(m.Rvec);
   Tvec.copyTo(m.Tvec);
   m.resize(size());
-  for (size_t i = 0; i < size(); i++)
+  for (size_t i = 0; i < size(); i++) {
     m.at(i) = at(i);
+  }
   m.dict_info = dict_info;
   m.contourPoints = contourPoints;
 }
 /**compares ids
  */
-Marker& Marker::operator=(const Marker& m)
+Marker & Marker::operator=(const Marker & m)
 {
   m.copyTo(*this);
   return *this;
@@ -103,23 +108,28 @@ void Marker::glGetModelViewMatrix(double modelview_matrix[16])
 {
   // check if paremeters are valid
   bool invalid = false;
-  for (int i = 0; i < 3 && !invalid; i++)
-  {
-    if (Tvec.at<float>(i, 0) != -999999)
+  for (int i = 0; i < 3 && !invalid; i++) {
+    if (Tvec.at<float>(i, 0) != -999999) {
       invalid |= false;
-    if (Rvec.at<float>(i, 0) != -999999)
+    }
+    if (Rvec.at<float>(i, 0) != -999999) {
       invalid |= false;
+    }
   }
-  if (invalid)
-    throw cv::Exception(9003, "extrinsic parameters are not set",
-                        "Marker::getModelViewMatrix", __FILE__, __LINE__);
+  if (invalid) {
+    throw cv::Exception(
+            9003, "extrinsic parameters are not set",
+            "Marker::getModelViewMatrix", __FILE__, __LINE__);
+  }
   cv::Mat Rot(3, 3, CV_32FC1), Jacob;
   cv::Rodrigues(Rvec, Rot, Jacob);
 
   double para[3][4];
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
       para[i][j] = Rot.at<float>(i, j);
+    }
+  }
   // now, add the translation
   para[0][3] = Tvec.at<float>(0, 0);
   para[1][3] = Tvec.at<float>(1, 0);
@@ -145,8 +155,7 @@ void Marker::glGetModelViewMatrix(double modelview_matrix[16])
   modelview_matrix[3 + 1 * 4] = 0.0;
   modelview_matrix[3 + 2 * 4] = 0.0;
   modelview_matrix[3 + 3 * 4] = 1.0;
-  if (scale != 0.0)
-  {
+  if (scale != 0.0) {
     modelview_matrix[12] *= scale;
     modelview_matrix[13] *= scale;
     modelview_matrix[14] *= scale;
@@ -160,16 +169,19 @@ void Marker::OgreGetPoseParameters(double position[3], double orientation[4])
 {
   // check if paremeters are valid
   bool invalid = false;
-  for (int i = 0; i < 3 && !invalid; i++)
-  {
-    if (Tvec.at<float>(i, 0) != -999999)
+  for (int i = 0; i < 3 && !invalid; i++) {
+    if (Tvec.at<float>(i, 0) != -999999) {
       invalid |= false;
-    if (Rvec.at<float>(i, 0) != -999999)
+    }
+    if (Rvec.at<float>(i, 0) != -999999) {
       invalid |= false;
+    }
   }
-  if (invalid)
-    throw cv::Exception(9003, "extrinsic parameters are not set",
-                        "Marker::getModelViewMatrix", __FILE__, __LINE__);
+  if (invalid) {
+    throw cv::Exception(
+            9003, "extrinsic parameters are not set",
+            "Marker::getModelViewMatrix", __FILE__, __LINE__);
+  }
 
   // calculate position vector
   position[0] = -Tvec.ptr<float>(0)[0];
@@ -214,8 +226,7 @@ void Marker::OgreGetPoseParameters(double position[3], double orientation[4])
   double fTrace = axes[0][0] + axes[1][1] + axes[2][2];
   double fRoot;
 
-  if (fTrace > 0.0)
-  {
+  if (fTrace > 0.0) {
     // |w| > 1/2, may as well choose w > 1/2
     fRoot = sqrt(fTrace + 1.0);  // 2w
     orientation[0] = 0.5 * fRoot;
@@ -223,21 +234,21 @@ void Marker::OgreGetPoseParameters(double position[3], double orientation[4])
     orientation[1] = (axes[2][1] - axes[1][2]) * fRoot;
     orientation[2] = (axes[0][2] - axes[2][0]) * fRoot;
     orientation[3] = (axes[1][0] - axes[0][1]) * fRoot;
-  }
-  else
-  {
+  } else {
     // |w| <= 1/2
-    static unsigned int s_iNext[3] = { 1, 2, 0 };
+    static unsigned int s_iNext[3] = {1, 2, 0};
     unsigned int i = 0;
-    if (axes[1][1] > axes[0][0])
+    if (axes[1][1] > axes[0][0]) {
       i = 1;
-    if (axes[2][2] > axes[i][i])
+    }
+    if (axes[2][2] > axes[i][i]) {
       i = 2;
+    }
     unsigned int j = s_iNext[i];
     unsigned int k = s_iNext[j];
 
     fRoot = sqrt(axes[i][i] - axes[j][j] - axes[k][k] + 1.0);
-    double* apkQuat[3] = { &orientation[1], &orientation[2], &orientation[3] };
+    double * apkQuat[3] = {&orientation[1], &orientation[2], &orientation[3]};
     *apkQuat[i] = 0.5 * fRoot;
     fRoot = 0.5 / fRoot;
     orientation[0] = (axes[k][j] - axes[j][k]) * fRoot;
@@ -246,20 +257,22 @@ void Marker::OgreGetPoseParameters(double position[3], double orientation[4])
   }
 }
 
-void Marker::draw(cv::Mat& in, cv::Scalar color, int lineWidth, bool writeId, bool writeInfo) const
+void Marker::draw(cv::Mat & in, cv::Scalar color, int lineWidth, bool writeId, bool writeInfo) const
 {
   auto _to_string = [](int i)
-  {
-    std::stringstream str;
-    str << i;
-    return str.str();
-  };
+    {
+      std::stringstream str;
+      str << i;
+      return str.str();
+    };
 
-  if (size() != 4)
+  if (size() != 4) {
     return;
+  }
   float flineWidth = lineWidth;
-  if (lineWidth == -1)  // auto
+  if (lineWidth == -1) { // auto
     flineWidth = std::max(1.f, std::min(5.f, float(in.cols) / 500.f));
+  }
   lineWidth = round(flineWidth);
   cv::line(in, (*this)[0], (*this)[1], color, lineWidth);
   cv::line(in, (*this)[1], (*this)[2], color, lineWidth);
@@ -267,44 +280,50 @@ void Marker::draw(cv::Mat& in, cv::Scalar color, int lineWidth, bool writeId, bo
   cv::line(in, (*this)[3], (*this)[0], color, lineWidth);
 
   auto p2 =
-      cv::Point2f(2.f * static_cast<float>(lineWidth), 2.f * static_cast<float>(lineWidth));
+    cv::Point2f(2.f * static_cast<float>(lineWidth), 2.f * static_cast<float>(lineWidth));
   cv::rectangle(in, (*this)[0] - p2, (*this)[0] + p2, cv::Scalar(0, 0, 255, 255), -1);
   cv::rectangle(in, (*this)[1] - p2, (*this)[1] + p2, cv::Scalar(0, 255, 0, 255), lineWidth);
   cv::rectangle(in, (*this)[2] - p2, (*this)[2] + p2, cv::Scalar(255, 0, 0, 255), lineWidth);
 
 
-
-  if (writeId)
-  {
+  if (writeId) {
     // determine the centroid
     cv::Point cent(0, 0);
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
       cent.x += static_cast<int>((*this)[i].x);
       cent.y += static_cast<int>((*this)[i].y);
     }
     cent.x /= 4;
     cent.y /= 4;
     std::string str;
-    if (writeInfo)
+    if (writeInfo) {
       str += dict_info + ":";
-    if (writeId)
+    }
+    if (writeId) {
       str += _to_string(id);
+    }
     float fsize = std::min(3.0f, flineWidth * 0.75f);
-    cv::putText(in, str, cent - cv::Point(10 * flineWidth, 0), cv::FONT_HERSHEY_SIMPLEX,
-                fsize, cv::Scalar(255, 255, 255) - color, lineWidth, cv::LINE_AA);
+    cv::putText(
+      in, str, cent - cv::Point(10 * flineWidth, 0), cv::FONT_HERSHEY_SIMPLEX,
+      fsize, cv::Scalar(255, 255, 255) - color, lineWidth, cv::LINE_AA);
   }
 }
 
 /**
  */
-void Marker::calculateExtrinsics(float markerSize, const CameraParameters& CP, bool setYPerpendicular)
+void Marker::calculateExtrinsics(
+  float markerSize, const CameraParameters & CP,
+  bool setYPerpendicular)
 {
-  if (!CP.isValid())
-    throw cv::Exception(9004, "!CP.isValid(): invalid camera parameters. It is not possible to calculate extrinsics",
-                        "calculateExtrinsics", __FILE__, __LINE__);
-  calculateExtrinsics(markerSize, CP.CameraMatrix, CP.Distorsion, CP.ExtrinsicMatrix,
-                      setYPerpendicular);
+  if (!CP.isValid()) {
+    throw cv::Exception(
+            9004,
+            "!CP.isValid(): invalid camera parameters. It is not possible to calculate extrinsics",
+            "calculateExtrinsics", __FILE__, __LINE__);
+  }
+  calculateExtrinsics(
+    markerSize, CP.CameraMatrix, CP.Distorsion, CP.ExtrinsicMatrix,
+    setYPerpendicular);
 }
 
 void print(cv::Point3f p, std::string cad)
@@ -313,30 +332,34 @@ void print(cv::Point3f p, std::string cad)
 }
 /**
  */
-void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff,
-                                 cv::Mat Extrinsics, bool setYPerpendicular, bool correctFisheye)
+void Marker::calculateExtrinsics(
+  float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff,
+  cv::Mat Extrinsics, bool setYPerpendicular, bool correctFisheye)
 {
-  if (!isValid())
-    throw cv::Exception(9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics",
-                        "calculateExtrinsics", __FILE__, __LINE__);
-  if (markerSizeMeters <= 0)
-    throw cv::Exception(9004, "markerSize<=0: invalid markerSize", "calculateExtrinsics",
-                        __FILE__, __LINE__);
-  if (camMatrix.rows == 0 || camMatrix.cols == 0)
+  if (!isValid()) {
+    throw cv::Exception(
+            9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics",
+            "calculateExtrinsics", __FILE__, __LINE__);
+  }
+  if (markerSizeMeters <= 0) {
+    throw cv::Exception(
+            9004, "markerSize<=0: invalid markerSize", "calculateExtrinsics",
+            __FILE__, __LINE__);
+  }
+  if (camMatrix.rows == 0 || camMatrix.cols == 0) {
     throw cv::Exception(9004, "CameraMatrix is empty", "calculateExtrinsics", __FILE__, __LINE__);
+  }
 
   std::vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
 
   cv::Mat raux, taux;
-  if (correctFisheye)
-  {
+  if (correctFisheye) {
     std::vector<cv::Point2f> undistorted;
     cv::fisheye::undistortPoints(*this, undistorted, camMatrix, distCoeff);
-    cv::solvePnP(objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()),
-                 cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
-  }
-  else
-  {
+    cv::solvePnP(
+      objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()),
+      cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
+  } else {
     cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
   }
   raux.convertTo(Rvec, CV_32F);
@@ -349,8 +372,9 @@ void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::
   Tvec.at<float>(2) += tz;
 
   // rotate the X axis so that Y is perpendicular to the marker plane
-  if (setYPerpendicular)
+  if (setYPerpendicular) {
     rotateXAxis(Rvec);
+  }
   ssize = markerSizeMeters;
   //  cout << (*this) << endl;
 }
@@ -365,11 +389,11 @@ std::vector<cv::Point3f> Marker::get3DPoints(float msize)
   //        res[2]=cv::Point3f(halfSize,-halfSize, 0);
   //        res[3]=cv::Point3f(-halfSize,- halfSize, 0);
   //        return res;
-  return { cv::Point3f(-halfSize, halfSize, 0), cv::Point3f(halfSize, halfSize, 0),
-           cv::Point3f(halfSize, -halfSize, 0), cv::Point3f(-halfSize, -halfSize, 0) };
+  return {cv::Point3f(-halfSize, halfSize, 0), cv::Point3f(halfSize, halfSize, 0),
+    cv::Point3f(halfSize, -halfSize, 0), cv::Point3f(-halfSize, -halfSize, 0)};
 }
 
-void Marker::rotateXAxis(cv::Mat& rotation)
+void Marker::rotateXAxis(cv::Mat & rotation)
 {
   cv::Mat R(3, 3, CV_32F);
   cv::Rodrigues(rotation, R);
@@ -391,8 +415,7 @@ void Marker::rotateXAxis(cv::Mat& rotation)
 cv::Point2f Marker::getCenter() const
 {
   cv::Point2f cent(0, 0);
-  for (size_t i = 0; i < size(); i++)
-  {
+  for (size_t i = 0; i < size(); i++) {
     cent.x += (*this)[i].x;
     cent.y += (*this)[i].y;
   }
@@ -421,55 +444,58 @@ float Marker::getPerimeter() const
 {
   assert(size() == 4);
   float sum = 0;
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 4; i++) {
     sum += static_cast<float>(norm((*this)[i] - (*this)[(i + 1) % 4]));
+  }
   return sum;
 }
 
 
 // saves to a binary stream
-void Marker::toStream(std::ostream& str) const
+void Marker::toStream(std::ostream & str) const
 {
   assert(Rvec.type() == CV_32F && Tvec.type() == CV_32F);
-  str.write((char*)&id, sizeof(id));
-  str.write((char*)&ssize, sizeof(ssize));
-  str.write((char*)Rvec.ptr<float>(0), 3 * sizeof(float));
-  str.write((char*)Tvec.ptr<float>(0), 3 * sizeof(float));
+  str.write((char *)&id, sizeof(id));
+  str.write((char *)&ssize, sizeof(ssize));
+  str.write((char *)Rvec.ptr<float>(0), 3 * sizeof(float));
+  str.write((char *)Tvec.ptr<float>(0), 3 * sizeof(float));
   // write the 2d points
   uint32_t np = static_cast<uint32_t>(size());
-  str.write((char*)&np, sizeof(np));
-  for (size_t i = 0; i < size(); i++)
-    str.write((char*)&at(i), sizeof(cv::Point2f));
+  str.write((char *)&np, sizeof(np));
+  for (size_t i = 0; i < size(); i++) {
+    str.write((char *)&at(i), sizeof(cv::Point2f));
+  }
   // write the additional info
   uint32_t s = dict_info.size();
-  str.write((char*)&s, sizeof(s));
-  str.write((char*)&dict_info[0], dict_info.size());
+  str.write((char *)&s, sizeof(s));
+  str.write((char *)&dict_info[0], dict_info.size());
   s = contourPoints.size();
-  str.write((char*)&s, sizeof(s));
-  str.write((char*)&contourPoints[0], contourPoints.size() * sizeof(contourPoints[0]));
+  str.write((char *)&s, sizeof(s));
+  str.write((char *)&contourPoints[0], contourPoints.size() * sizeof(contourPoints[0]));
 }
 // reads from a binary stream
-void Marker::fromStream(std::istream& str)
+void Marker::fromStream(std::istream & str)
 {
   Rvec.create(1, 3, CV_32F);
   Tvec.create(1, 3, CV_32F);
-  str.read((char*)&id, sizeof(id));
-  str.read((char*)&ssize, sizeof(ssize));
-  str.read((char*)Rvec.ptr<float>(0), 3 * sizeof(float));
-  str.read((char*)Tvec.ptr<float>(0), 3 * sizeof(float));
+  str.read((char *)&id, sizeof(id));
+  str.read((char *)&ssize, sizeof(ssize));
+  str.read((char *)Rvec.ptr<float>(0), 3 * sizeof(float));
+  str.read((char *)Tvec.ptr<float>(0), 3 * sizeof(float));
   uint32_t np;
-  str.read((char*)&np, sizeof(np));
+  str.read((char *)&np, sizeof(np));
   resize(np);
-  for (size_t i = 0; i < size(); i++)
-    str.read((char*)&(*this)[i], sizeof(cv::Point2f));
+  for (size_t i = 0; i < size(); i++) {
+    str.read((char *)&(*this)[i], sizeof(cv::Point2f));
+  }
   // read the additional info
   uint32_t s;
-  str.read((char*)&s, sizeof(s));
+  str.read((char *)&s, sizeof(s));
   dict_info.resize(s);
-  str.read((char*)&dict_info[0], dict_info.size());
-  str.read((char*)&s, sizeof(s));
+  str.read((char *)&dict_info[0], dict_info.size());
+  str.read((char *)&s, sizeof(s));
   contourPoints.resize(s);
-  str.read((char*)&contourPoints[0], contourPoints.size() * sizeof(contourPoints[0]));
+  str.read((char *)&contourPoints[0], contourPoints.size() * sizeof(contourPoints[0]));
 }
 
 cv::Mat Marker::getTransformMatrix() const
@@ -477,8 +503,9 @@ cv::Mat Marker::getTransformMatrix() const
   cv::Mat T = cv::Mat::eye(4, 4, CV_32F);
   cv::Mat rot = T.rowRange(0, 3).colRange(0, 3);
   cv::Rodrigues(Rvec, rot);
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++) {
     T.at<float>(i, 3) = Tvec.ptr<float>(0)[i];
+  }
   return T;
 }
 
@@ -487,8 +514,9 @@ float Marker::getRadius() const
   auto center = getCenter();
 
   float maxDist = 0;
-  for (auto p : *this)
+  for (auto p : *this) {
     maxDist = std::max(maxDist, float(cv::norm(p - center)));
+  }
   return maxDist;
 }
 

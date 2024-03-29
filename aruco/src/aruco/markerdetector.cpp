@@ -87,7 +87,7 @@ MarkerDetector::~MarkerDetector()
   delete _impl;
 }
 
-void MarkerDetector::setParameters(const Params &params)
+void MarkerDetector::setParameters(const Params & params)
 {
   _impl->setParameters(params);
 }
@@ -109,7 +109,6 @@ DetectionMode MarkerDetector::getDetectionMode()
 }
 
 
-
 /************************************
  *
  *
@@ -117,15 +116,16 @@ DetectionMode MarkerDetector::getDetectionMode()
  *
  ************************************/
 
-std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input)
+std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat & input)
 {
   return _impl->detect(input);
 }
 
-std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input,
-                                                  const CameraParameters &camParams,
-                                                  float markerSizeMeters,
-                                                  bool setYPerperdicular, bool correctFisheye)
+std::vector<aruco::Marker> MarkerDetector::detect(
+  const cv::Mat & input,
+  const CameraParameters & camParams,
+  float markerSizeMeters,
+  bool setYPerperdicular, bool correctFisheye)
 {
   return _impl->detect(input, camParams, markerSizeMeters, setYPerperdicular, correctFisheye);
 }
@@ -136,11 +136,14 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input,
  *
  *
  ************************************/
-void MarkerDetector::detect(const cv::Mat &input, std::vector<Marker> &detectedMarkers,
-                            CameraParameters camParams, float markerSizeMeters,
-                            bool setYPerpendicular, bool correctFisheye)
+void MarkerDetector::detect(
+  const cv::Mat & input, std::vector<Marker> & detectedMarkers,
+  CameraParameters camParams, float markerSizeMeters,
+  bool setYPerpendicular, bool correctFisheye)
 {
-  _impl->detect(input, detectedMarkers, camParams, markerSizeMeters, setYPerpendicular, correctFisheye);
+  _impl->detect(
+    input, detectedMarkers, camParams, markerSizeMeters, setYPerpendicular,
+    correctFisheye);
 }
 
 /**Returns operating params
@@ -151,7 +154,7 @@ MarkerDetector::Params MarkerDetector::getParameters() const
 }
 /**Returns operating params
  */
-MarkerDetector::Params &MarkerDetector::getParameters()
+MarkerDetector::Params & MarkerDetector::getParameters()
 {
   return _impl->getParameters();
 }
@@ -189,7 +192,7 @@ cv::Mat MarkerDetector::getThresholdedImage(uint32_t idx)
   return _impl->getThresholdedImage(idx);
 }
 
-void MarkerDetector::Params::save(cv::FileStorage &fs) const
+void MarkerDetector::Params::save(cv::FileStorage & fs) const
 {
   fs << "aruco-dictionary" << dictionary;
   fs << "aruco-detectMode" << toString(detectMode);
@@ -214,7 +217,7 @@ void MarkerDetector::Params::save(cv::FileStorage &fs) const
   fs << "aruco-closingSize" << closingSize;
 }
 
-void MarkerDetector::Params::load(cv::FileStorage &fs)
+void MarkerDetector::Params::load(cv::FileStorage & fs)
 {
   attemtpRead("aruco-maxThreads", maxThreads, fs);
   attemtpRead("aruco-borderDistThres", borderDistThres, fs);
@@ -236,21 +239,17 @@ void MarkerDetector::Params::load(cv::FileStorage &fs)
   attemtpRead("aruco-closingSize", closingSize, fs);
 
 
-
-  if (fs["aruco-detectMode"].type() != cv::FileNode::NONE)
-  {
+  if (fs["aruco-detectMode"].type() != cv::FileNode::NONE) {
     string aux;
     fs["aruco-detectMode"] >> aux;
     detectMode = getDetectionModeFromString(aux);
   }
-  if (fs["aruco-thresMethod"].type() != cv::FileNode::NONE)
-  {
+  if (fs["aruco-thresMethod"].type() != cv::FileNode::NONE) {
     string aux;
     fs["aruco-thresMethod"] >> aux;
     thresMethod = getCornerThresMethodFromString(aux);
   }
-  if (fs["aruco-cornerRefinementM"].type() != cv::FileNode::NONE)
-  {
+  if (fs["aruco-cornerRefinementM"].type() != cv::FileNode::NONE) {
     string aux;
     fs["aruco-cornerRefinementM"] >> aux;
     cornerRefinementM = getCornerRefinementMethodFromString(aux);
@@ -258,7 +257,7 @@ void MarkerDetector::Params::load(cv::FileStorage &fs)
 }
 
 
-void MarkerDetector::Params::toStream(std::ostream &str) const
+void MarkerDetector::Params::toStream(std::ostream & str) const
 {
   str.write((char *)&detectMode, sizeof(detectMode));
   str.write((char *)&maxThreads, sizeof(maxThreads));
@@ -283,7 +282,7 @@ void MarkerDetector::Params::toStream(std::ostream &str) const
 
   _toStream(dictionary, str);
 }
-void MarkerDetector::Params::fromStream(std::istream &str)
+void MarkerDetector::Params::fromStream(std::istream & str)
 {
   str.read((char *)&detectMode, sizeof(detectMode));
   str.read((char *)&maxThreads, sizeof(maxThreads));
@@ -308,127 +307,130 @@ void MarkerDetector::Params::fromStream(std::istream &str)
 }
 /**Saves the configuration of the detector to a file
  */
-void MarkerDetector::saveParamsToFile(const std::string &path) const
+void MarkerDetector::saveParamsToFile(const std::string & path) const
 {
   _impl->saveParamsToFile(path);
 }
 
 /**Loads the configuration from a file
  */
-void MarkerDetector::loadParamsFromFile(const std::string &path)
+void MarkerDetector::loadParamsFromFile(const std::string & path)
 {
   _impl->loadParamsFromFile(path);
 }
 
-void MarkerDetector::toStream(std::ostream &str) const
+void MarkerDetector::toStream(std::ostream & str) const
 {
   _impl->toStream(str);
 }
 
-void MarkerDetector::fromStream(std::istream &str)
+void MarkerDetector::fromStream(std::istream & str)
 {
   _impl->fromStream(str);
 }
 
 std::string MarkerDetector::Params::toString(DetectionMode dm)
 {
-  switch (dm)
-  {
+  switch (dm) {
     case DM_FAST:
       return "DM_FAST";
     case DM_NORMAL:
       return "DM_NORMAL";
     case DM_VIDEO_FAST:
       return "DM_VIDEO_FAST";
-  };
+  }
   return "DM_NORMAL";
 }
 
-DetectionMode MarkerDetector::Params::getDetectionModeFromString(const std::string &str)
+DetectionMode MarkerDetector::Params::getDetectionModeFromString(const std::string & str)
 {
-  if (str == "DM_FAST")
+  if (str == "DM_FAST") {
     return DM_FAST;
-  if (str == "DM_NORMAL")
+  }
+  if (str == "DM_NORMAL") {
     return DM_NORMAL;
-  if (str == "DM_VIDEO_FAST")
+  }
+  if (str == "DM_VIDEO_FAST") {
     return DM_VIDEO_FAST;
+  }
   return DM_NORMAL;
 }
 
 std::string MarkerDetector::Params::toString(CornerRefinementMethod dm)
 {
-  switch (dm)
-  {
+  switch (dm) {
     case CORNER_LINES:
       return "CORNER_LINES";
     case CORNER_SUBPIX:
       return "CORNER_SUBPIX";
     case CORNER_NONE:
       return "CORNER_NONE";
-  };
+  }
   return "CORNER_SUBPIX";
 }
-CornerRefinementMethod MarkerDetector::Params::getCornerRefinementMethodFromString(const std::string &str)
+CornerRefinementMethod MarkerDetector::Params::getCornerRefinementMethodFromString(
+  const std::string & str)
 {
-  if (str == "CORNER_LINES")
+  if (str == "CORNER_LINES") {
     return CORNER_LINES;
-  if (str == "CORNER_SUBPIX")
+  }
+  if (str == "CORNER_SUBPIX") {
     return CORNER_SUBPIX;
-  if (str == "CORNER_NONE")
+  }
+  if (str == "CORNER_NONE") {
     return CORNER_NONE;
+  }
   return CORNER_SUBPIX;
 }
 std::string MarkerDetector::Params::toString(MarkerDetector::ThresMethod dm)
 {
-  switch (dm)
-  {
+  switch (dm) {
     case THRES_ADAPTIVE:
       return "THRES_ADAPTIVE";
     case THRES_AUTO_FIXED:
       return "THRES_AUTO_FIXED";
-  };
+  }
   return "THRES_ADAPTIVE";
 }
-MarkerDetector::ThresMethod MarkerDetector::Params::getCornerThresMethodFromString(const std::string &str)
+MarkerDetector::ThresMethod MarkerDetector::Params::getCornerThresMethodFromString(
+  const std::string & str)
 {
-  if (str == "THRES_ADAPTIVE")
+  if (str == "THRES_ADAPTIVE") {
     return THRES_ADAPTIVE;
-  if (str == "THRES_AUTO_FIXED")
+  }
+  if (str == "THRES_AUTO_FIXED") {
     return THRES_AUTO_FIXED;
+  }
   return THRES_ADAPTIVE;
 }
-void MarkerDetector::Params::setThresholdMethod(MarkerDetector::ThresMethod method,
-                                                int thresHold, int wsize, int wsize_range)
+void MarkerDetector::Params::setThresholdMethod(
+  MarkerDetector::ThresMethod method,
+  int thresHold, int wsize, int wsize_range)
 {
   AdaptiveThresWindowSize = wsize;
   thresMethod = method;
-  if (thresHold == -1)
-  {
-    if (method == MarkerDetector::THRES_AUTO_FIXED)
+  if (thresHold == -1) {
+    if (method == MarkerDetector::THRES_AUTO_FIXED) {
       ThresHold = 100;
-    else
+    } else {
       ThresHold = 7;
-  }
-  else
+    }
+  } else {
     ThresHold = thresHold;
+  }
   AdaptiveThresWindowSize_range = wsize_range;
 }
 void MarkerDetector::Params::setDetectionMode(DetectionMode dm, float minMarkerSize)
 {
   detectMode = dm;
   minSize = minMarkerSize;
-  if (detectMode == DM_NORMAL)
-  {
+  if (detectMode == DM_NORMAL) {
     setAutoSizeSpeedUp(false);
     setThresholdMethod(THRES_ADAPTIVE);
-  }
-  else if (detectMode == DM_FAST)
-  {
+  } else if (detectMode == DM_FAST) {
     setAutoSizeSpeedUp(false);
     setThresholdMethod(THRES_AUTO_FIXED);
-  }
-  else if (detectMode == DM_VIDEO_FAST)
-  {
+  } else if (detectMode == DM_VIDEO_FAST) {
     setThresholdMethod(THRES_AUTO_FIXED);
     setAutoSizeSpeedUp(true, 0.3);
   }
@@ -436,16 +438,17 @@ void MarkerDetector::Params::setDetectionMode(DetectionMode dm, float minMarkerS
 void MarkerDetector::Params::setCornerRefinementMethod(CornerRefinementMethod method)
 {
   cornerRefinementM = method;
-  if (method != CORNER_SUBPIX)
+  if (method != CORNER_SUBPIX) {
     minSize = 0;
+  }
 }
-void MarkerDetector::Params::_toStream(const std::string &strg, std::ostream &str)
+void MarkerDetector::Params::_toStream(const std::string & strg, std::ostream & str)
 {
   uint32_t s = strg.size();
   str.write((char *)&s, sizeof(s));
   str.write(strg.c_str(), strg.size());
 }
-void MarkerDetector::Params::_fromStream(std::string &strg, std::istream &str)
+void MarkerDetector::Params::_fromStream(std::string & strg, std::istream & str)
 {
   uint32_t s;
   str.read((char *)&s, sizeof(s));
@@ -453,12 +456,12 @@ void MarkerDetector::Params::_fromStream(std::string &strg, std::istream &str)
   str.read(&strg[0], strg.size());
 }
 
-void MarkerDetector::cornerUpsample(std::vector<std::vector<cv::Point2f> > &corners,
-                                    cv::Size lowResImageSize)
+void MarkerDetector::cornerUpsample(
+  std::vector<std::vector<cv::Point2f>> & corners,
+  cv::Size lowResImageSize)
 {
   _impl->cornerUpsample(corners, lowResImageSize);
 }
 
 
-
-};  // namespace aruco
+}   // namespace aruco
